@@ -12,8 +12,8 @@
 %TOC%
 <table style="float:right">
 <tr>
-  <td><img src="%PUBURLPATH%/%SYSTEMWEB%/LdapContrib/wikiringlogo40x40.png"></td>
-  <td><a href="http://wikiring.de" title="Make your Wiki ring!" style="text-decoration:none">
+  <td><img src="%ATTACHURLPATH%/wikiringlogo40x40.png"></td>
+  <td><a href="http://wikiring.com" title="Make your Wiki ring!" style="text-decoration:none">
       Powered by <br /> <nop>WikiRing Consultants </a>
   </td>
 </tr>
@@ -139,10 +139,11 @@ The %TOPIC% will use the default configuration of the LdapContrib in your =Local
 ---++ Plugin Info
 This work was partly funded by Spanlink Communications.
 |  Plugin Author: | TWiki:Main.MichaelDaum |
-|  Copyright &copy;: | 2006-2007 Michael Daum http://wikiring.de |
+|  Copyright &copy;: | 2006-2008 Michael Daum http://michaeldaumconsulting.com |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
-|  Plugin Version: | v2.01 |
+|  Plugin Version: | v2.02 |
 |  Change History: | &nbsp; |
+|  12 Jun 2008: | fixed yet another "sep" problem |
 |  13 Nov 2007: | fixed $nop  |
 |  01 Oct 2007: | added LDAPUSERS, lined up to changes in <nop>LdapContrib-2.0 |
 |  04 June 2007: | don't convert from/to utf8 if the site charset is already utf8 |
@@ -157,4 +158,4 @@ This work was partly funded by Spanlink Communications.
 |  Plugin Home: | Foswiki:Extensions/%TOPIC% |
 |  Feedback: | Foswiki:Extensions/%TOPIC%Dev |
 
--- TWiki:Main/MichaelDaum - 13 Nov 2007
+-- TWiki:Main/MichaelDaum - 12 Jun 2008

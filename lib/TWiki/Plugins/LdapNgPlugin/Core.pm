@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2006 Michael Daum http://wikiring.com
+# Copyright (C) 2006-2008 Michael Daum http://michaeldaumconsulting.com
 # Portions Copyright (C) 2006 Spanlink Communications
 #
 # This program is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@ use strict;
 use Unicode::MapUTF8 qw(from_utf8);
 use TWiki::Contrib::LdapContrib;
 
-sub DEBUG { 0; } # toggle me
+use constant DEBUG => 0; # toggle me
 
 ###############################################################################
 sub writeDebug {
@@ -148,13 +148,15 @@ sub handleLdapUsers {
   my $theHeader = $params->{header} || ''; 
   my $theFormat = $params->{format} || '   1 $displayName';
   my $theFooter = $params->{footer} || '';
-  my $theSep = $params->{sep} || '$n';
+  my $theSep = $params->{sep};
   my $theLimit = $params->{limit} || 0;
   my $theSkip = $params->{skip} || 0;
   my $theInclude = $params->{include};
   my $theExclude = $params->{exclude};
   my $theHideUnknownUsers = $params->{hideunknown} || 'on';
   $theHideUnknownUsers = ($theHideUnknownUsers eq 'on')?1:0;
+
+  $theSep = '$n' unless defined $theSep;
 
   my $mainWeb = TWiki::Func::getMainWebname();
   my $wikiNames = $ldap->getAllWikiNames();
@@ -170,6 +172,7 @@ sub handleLdapUsers {
     next if $index <= $theSkip;
     my $loginName = $ldap->getLoginOfWikiName($wikiName);
     my $emailAddrs = $ldap->getEmails($loginName);
+    my $distinguishedName = $ldap->getDnOfLogin($loginName) || '';
     my $displayName;
     if (TWiki::Func::topicExists($mainWeb, $wikiName)) {
       $displayName = "[[$mainWeb.$wikiName][$wikiName]]";
@@ -184,6 +187,7 @@ sub handleLdapUsers {
       index=>$index,
       wikiName=>$wikiName,
       displayName=>$displayName,
+      dn=>$distinguishedName,
       loginName=>$loginName,
       emails=>$emailAddrs);
     $result .= $line;
@@ -191,6 +195,42 @@ sub handleLdapUsers {
   }
 
   return expandVars($theHeader).$result.expandVars($theFooter);
+}
+
+###############################################################################
+sub handleEmailToWikiName {
+  my ($session, $params, $topic, $web) = @_;
+
+
+  my $theFormat = $params->{format} || '$wikiname';
+  my $theHeader = $params->{header} || '';
+  my $theFooter = $params->{footer} || '';
+  my $theSep = $params->{separator};
+  my $theEmail = $params->{_DEFAULT} || $params->{email} || '';
+
+  $theSep = ', ' unless defined $theSep;
+
+  my @wikiNames = TWiki::Func::emailToWikiNames($theEmail, 1);
+  my $mainWeb = TWiki::Func::getMainWebname();
+  my @result = ();
+  my $count = scalar(@wikiNames);
+  my $index = 0;
+  foreach my $wikiName (sort @wikiNames) {
+    $index++;
+    my $line = $theFormat;
+    my $wikiUserName = $mainWeb.'.'.$wikiName;
+    $line =~ s/\$wikiname/$wikiName/g;
+    $line =~ s/\$wikiusername/$wikiUserName/g;
+    $line =~ s/\$index/$index/g;
+    $line =~ s/\$count/$count/g;
+    push @result, $line;
+  }
+  return '' unless @result;
+
+  $theHeader =~ s/\$count/$count/g;
+  $theFooter =~ s/\$count/$count/g;
+
+  return $theHeader.join($theSep, @result).$theFooter;
 }
 
 ###############################################################################

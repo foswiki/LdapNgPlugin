@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2006 Michael Daum http://wikiring.com
+# Copyright (C) 2006-2008 Michael Daum http://michaeldaumconsulting.com
 # Portions Copyright (C) 2006 Spanlink Communications
 #
 # This program is free software; you can redistribute it and/or
@@ -19,7 +19,7 @@ use strict;
 use vars qw($VERSION $RELEASE $isInitialized $NO_PREFS_IN_TOPIC $SHORTDESCRIPTION);
 
 $VERSION = '$Rev$';
-$RELEASE = 'v2.01';
+$RELEASE = 'v2.02';
 $NO_PREFS_IN_TOPIC = 1;
 $SHORTDESCRIPTION = 'Query and display data from an LDAP directory';
 
@@ -29,6 +29,9 @@ sub initPlugin {
 
   TWiki::Func::registerTagHandler('LDAP', \&handleLdap);
   TWiki::Func::registerTagHandler('LDAPUSERS', \&handleLdapUsers);
+  TWiki::Func::registerTagHandler('EMAIL2WIKINAME', \&handleEmailToWikiName); 
+
+  # for testing only
   return 1; 
 }
 
@@ -50,6 +53,12 @@ sub handleLdap {
 sub handleLdapUsers {
   initCore();
   return TWiki::Plugins::LdapNgPlugin::Core::handleLdapUsers(@_);
+}
+
+###############################################################################
+sub handleEmailToWikiName {
+  initCore();
+  return TWiki::Plugins::LdapNgPlugin::Core::handleEmailToWikiName(@_);
 }
 
 1;
