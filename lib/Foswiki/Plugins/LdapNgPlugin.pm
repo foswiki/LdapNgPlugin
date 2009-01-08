@@ -19,7 +19,7 @@ use strict;
 use vars qw($VERSION $RELEASE $isInitialized $NO_PREFS_IN_TOPIC $SHORTDESCRIPTION);
 
 $VERSION = '$Rev: 1801 $';
-$RELEASE = 'v2.02';
+$RELEASE = 'v2.03';
 $NO_PREFS_IN_TOPIC = 1;
 $SHORTDESCRIPTION = 'Query and display data from an LDAP directory';
 
