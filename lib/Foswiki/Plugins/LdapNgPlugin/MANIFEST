@@ -1,0 +1,3 @@
+data/System/LdapNgPlugin.txt 0644
+lib/Foswiki/Plugins/LdapNgPlugin.pm 0644
+lib/Foswiki/Plugins/LdapNgPlugin/Core.pm 0644

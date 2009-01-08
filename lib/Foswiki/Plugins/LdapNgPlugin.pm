@@ -13,12 +13,12 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-package TWiki::Plugins::LdapNgPlugin;
+package Foswiki::Plugins::LdapNgPlugin;
 
 use strict;
 use vars qw($VERSION $RELEASE $isInitialized $NO_PREFS_IN_TOPIC $SHORTDESCRIPTION);
 
-$VERSION = '$Rev$';
+$VERSION = '$Rev: 1801 $';
 $RELEASE = 'v2.02';
 $NO_PREFS_IN_TOPIC = 1;
 $SHORTDESCRIPTION = 'Query and display data from an LDAP directory';
@@ -27,9 +27,9 @@ $SHORTDESCRIPTION = 'Query and display data from an LDAP directory';
 sub initPlugin { 
   $isInitialized = 0;
 
-  TWiki::Func::registerTagHandler('LDAP', \&handleLdap);
-  TWiki::Func::registerTagHandler('LDAPUSERS', \&handleLdapUsers);
-  TWiki::Func::registerTagHandler('EMAIL2WIKINAME', \&handleEmailToWikiName); 
+  Foswiki::Func::registerTagHandler('LDAP', \&handleLdap);
+  Foswiki::Func::registerTagHandler('LDAPUSERS', \&handleLdapUsers);
+  Foswiki::Func::registerTagHandler('EMAIL2WIKINAME', \&handleEmailToWikiName); 
 
   # for testing only
   return 1; 
@@ -38,27 +38,26 @@ sub initPlugin {
 ###############################################################################
 sub initCore {
   return if $isInitialized;
-  require TWiki::Plugins::LdapNgPlugin::Core;
-  die $@ if $@;
+  require Foswiki::Plugins::LdapNgPlugin::Core;;
   $isInitialized = 1;
 }
 
 ###############################################################################
 sub handleLdap {
   initCore();
-  return TWiki::Plugins::LdapNgPlugin::Core::handleLdap(@_);
+  return Foswiki::Plugins::LdapNgPlugin::Core::handleLdap(@_);
 }
 
 ###############################################################################
 sub handleLdapUsers {
   initCore();
-  return TWiki::Plugins::LdapNgPlugin::Core::handleLdapUsers(@_);
+  return Foswiki::Plugins::LdapNgPlugin::Core::handleLdapUsers(@_);
 }
 
 ###############################################################################
 sub handleEmailToWikiName {
   initCore();
-  return TWiki::Plugins::LdapNgPlugin::Core::handleEmailToWikiName(@_);
+  return Foswiki::Plugins::LdapNgPlugin::Core::handleEmailToWikiName(@_);
 }
 
 1;
