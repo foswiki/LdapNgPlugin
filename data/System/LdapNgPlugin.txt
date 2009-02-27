@@ -126,6 +126,8 @@ The %TOPIC% will use the default configuration of the LdapContrib in your =Local
 
 ---++ Plugin Installation Instructions
 %$INSTALL_INSTRUCTIONS%
+
+---++ Dependencies
 %$DEPENDENCIES%
 
 ---++ Plugin Info
@@ -133,8 +135,9 @@ This work was partly funded by Spanlink Communications.
 |  Plugin Author: | Michael Daum |
 |  Copyright &copy;: | 2006-2009 Michael Daum http://michaeldaumconsulting.com |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
-|  Plugin Version: | v2.03 |
+|  Plugin Version: | v3.00 |
 |  Change History: | &nbsp; |
+|  27 Jan 2009: | syncing version number with <nop>LdapContrib |
 |  08 Jan 2009: | ported to foswiki |
 |  12 Jun 2008: | fixed yet another "sep" problem |
 |  13 Nov 2007: | fixed $nop  |
