@@ -40,7 +40,7 @@ Parameters:
    * =format=: format string used to display a database record
    * =header=: header to prepend the output; default: '$dn'
    * =footer=: footer to appended to the output
-   * =sep=: separator between database records; default: '$n'
+   * =separator=: separator between database records; default: '$n'
    * =sort=: name of attributes to sort the output
    * =reverse=: reverse the result set; possible values: on, off; default: off
    * =limit=: maximum number of records to return; default: 0 (unlimited)
@@ -135,8 +135,10 @@ This work was partly funded by Spanlink Communications.
 |  Plugin Author: | Michael Daum |
 |  Copyright &copy;: | 2006-2009 Michael Daum http://michaeldaumconsulting.com |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
-|  Plugin Version: | v3.00 |
+|  Release: | %$RELEASE% |
+|  Version: | %$VERSION% |
 |  Change History: | &nbsp; |
+|  17 Nov 2009: | renamed =sep= parameter to =separator= for consistency |
 |  27 Jan 2009: | syncing version number with <nop>LdapContrib |
 |  08 Jan 2009: | ported to foswiki |
 |  12 Jun 2008: | fixed yet another "sep" problem |

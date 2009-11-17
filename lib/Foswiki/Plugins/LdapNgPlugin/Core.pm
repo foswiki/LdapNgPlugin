@@ -32,7 +32,7 @@ sub writeDebug {
 sub handleLdap {
   my ($session, $params, $topic, $web) = @_;
 
-  writeDebug("called handleLdap($web, $topic)");
+  #writeDebug("called handleLdap($web, $topic)");
 
   # get args
   my $theFilter = $params->{'filter'} || $params->{_DEFAULT} || '';
@@ -45,7 +45,7 @@ sub handleLdap {
   my $theFormat = $params->{format} || '$dn';
   my $theHeader = $params->{header} || ''; 
   my $theFooter = $params->{footer} || '';
-  my $theSep = $params->{sep} || '$n';
+  my $theSep = $params->{separator};
   my $theSort = $params->{sort} || '';
   my $theReverse = $params->{reverse} || 'off';
   my $theLimit = $params->{limit} || 0;
@@ -53,6 +53,8 @@ sub handleLdap {
   my $theHideNull = $params->{hidenull} || 'off';
   my $theClear = $params->{clear} || '';
 
+  $theSep = $params->{sep} unless defined $theSep;
+  $theSep = '$n' unless defined $theSep;
   my $query = Foswiki::Func::getCgiQuery();
   my $theRefresh = $query->param('refresh') || 0;
   $theRefresh = ($theRefresh eq 'on')?1:0;
@@ -63,7 +65,7 @@ sub handleLdap {
   my @theSort = split(/[\s,]+/, $theSort);
   $theBase = $1.','.$Foswiki::cfg{Ldap}{Base} if $theBase =~ /^\((.*)\)$/;
   #writeDebug("base=$theBase");
-  writeDebug("format=$theFormat");
+  #writeDebug("format=$theFormat");
 
   # new connection
   my $ldap = new Foswiki::Contrib::LdapContrib(
@@ -86,7 +88,7 @@ sub handleLdap {
     return &inlineError('ERROR: '.$ldap->getError());
   }
 
-  my $count = $search->count();
+  my $count = $search->count() || 0;
   return '' if ($count <= $theSkip) && $theHideNull eq 'on';
 
   # format
@@ -123,11 +125,10 @@ sub handleLdap {
   #$result = $session->UTF82SiteCharSet($result) || $result;
   $result = from_utf8(-string=>$result, -charset=>$Foswiki::cfg{Site}{CharSet})
     unless $Foswiki::cfg{Site}{CharSet} =~ /^utf-?8$/i;
-  $result = Foswiki::Func::expandCommonVariables("$theHeader$result$theFooter", 
-    $topic, $web);
+  $result = $theHeader.$result.$theFooter;
 
-  writeDebug("done handleLdap()");
-  writeDebug("result=$result");
+  #writeDebug("done handleLdap()");
+  #writeDebug("result=$result");
 
   if ($theClear) {
     $theClear =~ s/\$/\\\$/g;
@@ -142,13 +143,13 @@ sub handleLdap {
 sub handleLdapUsers {
   my ($session, $params, $topic, $web) = @_;
 
-  writeDebug("called handleLdapUsers($web, $topic)");
+  #writeDebug("called handleLdapUsers($web, $topic)");
 
   my $ldap = Foswiki::Contrib::LdapContrib::getLdapContrib($session);
   my $theHeader = $params->{header} || ''; 
   my $theFormat = $params->{format} || '   1 $displayName';
   my $theFooter = $params->{footer} || '';
-  my $theSep = $params->{sep};
+  my $theSep = $params->{separator};
   my $theLimit = $params->{limit} || 0;
   my $theSkip = $params->{skip} || 0;
   my $theInclude = $params->{include};
@@ -156,6 +157,7 @@ sub handleLdapUsers {
   my $theHideUnknownUsers = $params->{hideunknown} || 'on';
   $theHideUnknownUsers = ($theHideUnknownUsers eq 'on')?1:0;
 
+  $theSep = $params->{sep} unless defined $theSep;
   $theSep = '$n' unless defined $theSep;
 
   my $mainWeb = Foswiki::Func::getMainWebname();
@@ -168,8 +170,6 @@ sub handleLdapUsers {
   foreach my $wikiName (sort @$wikiNames) {
     next if $theExclude && $wikiName =~ /$theExclude/;
     next if $theInclude && $wikiName !~ /$theInclude/;
-    $index++;
-    next if $index <= $theSkip;
     my $loginName = $ldap->getLoginOfWikiName($wikiName);
     my $emailAddrs = $ldap->getEmails($loginName);
     my $distinguishedName = $ldap->getDnOfLogin($loginName) || '';
@@ -180,6 +180,8 @@ sub handleLdapUsers {
       next if $theHideUnknownUsers;
       $displayName ="<nop>$wikiName";
     }
+    $index++;
+    next if $index <= $theSkip;
     my $line;
     $line = $theSep if $result;
     $line .= $theFormat;
@@ -235,7 +237,7 @@ sub handleEmailToWikiName {
 
 ###############################################################################
 sub inlineError {
-  return "<div class=\"twikiAlert\">$_[0]</div>";
+  return "<div class=\"foswikiAlert\">$_[0]</div>";
 }
 
 ###############################################################################
@@ -246,7 +248,7 @@ sub expandVars {
 
   foreach my $key (keys %data) {
     my $value = $data{$key};
-    next unless $value;
+    next unless defined $value;
     $value = join(', ', sort @$value) if ref($data{$key}) eq 'ARRAY';
 
     # Format list values using the '$' delimiter in multiple lines; see rfc4517
