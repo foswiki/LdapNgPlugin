@@ -19,7 +19,7 @@ use strict;
 use vars qw($VERSION $RELEASE $isInitialized $NO_PREFS_IN_TOPIC $SHORTDESCRIPTION);
 
 $VERSION = '$Rev: 1801 $';
-$RELEASE = 'v3.01';
+$RELEASE = 'v3.10';
 $NO_PREFS_IN_TOPIC = 1;
 $SHORTDESCRIPTION = 'Query and display data from an LDAP directory';
 
@@ -31,7 +31,6 @@ sub initPlugin {
   Foswiki::Func::registerTagHandler('LDAPUSERS', \&handleLdapUsers);
   Foswiki::Func::registerTagHandler('EMAIL2WIKINAME', \&handleEmailToWikiName); 
 
-  # for testing only
   return 1; 
 }
 

@@ -16,8 +16,7 @@
 package Foswiki::Plugins::LdapNgPlugin::Core;
 
 use strict;
-use Unicode::MapUTF8 qw(from_utf8);
-use Foswiki::Contrib::LdapContrib;
+use Foswiki::Contrib::LdapContrib ();
 
 use constant DEBUG => 0; # toggle me
 
@@ -52,6 +51,8 @@ sub handleLdap {
   my $theSkip = $params->{skip} || 0;
   my $theHideNull = $params->{hidenull} || 'off';
   my $theClear = $params->{clear} || '';
+  my $theExclude = $params->{exclude} || '';
+  my $theInclude = $params->{include} || '';
 
   $theSep = $params->{sep} unless defined $theSep;
   $theSep = '$n' unless defined $theSep;
@@ -97,10 +98,15 @@ sub handleLdap {
   @entries = reverse @entries if $theReverse eq 'on';
   my $index = 0;
   foreach my $entry (@entries) {
+    my $dn = $entry->dn();
+    next if $theExclude && $dn =~ /$theExclude/;
+    next if $theInclude && $dn !~ /$theInclude/;
+
     $index++;
     next if $index <= $theSkip;
+
     my %data;
-    $data{dn} = $entry->dn();
+    $data{dn} = $dn;
     $data{index} = $index;
     $data{count} = $count;
     foreach my $attr ($entry->attributes()) {
@@ -123,8 +129,7 @@ sub handleLdap {
   $theFooter = expandVars($theFooter,count=>$count) if $theFooter;
 
   #$result = $session->UTF82SiteCharSet($result) || $result;
-  $result = from_utf8(-string=>$result, -charset=>$Foswiki::cfg{Site}{CharSet})
-    unless $Foswiki::cfg{Site}{CharSet} =~ /^utf-?8$/i;
+  $result = $ldap->fromUtf8($result);
   $result = $theHeader.$result.$theFooter;
 
   #writeDebug("done handleLdap()");
@@ -136,7 +141,7 @@ sub handleLdap {
     $result =~ s/$regex//g;
   }
 
-  return $result;
+  return Foswiki::Func::expandCommonVariables($result, $topic, $web);
 }
 
 ###############################################################################
@@ -259,8 +264,6 @@ sub expandVars {
     $format =~ s/\$$key\b/$value/gi;
     #writeDebug("$key=$value");
   }
-
-  $format =~ s/\n/<br \/>/go; # multi-line values, e.g. for postalAddress
 
   $format =~ s/\$nop//go;
   $format =~ s/\$n/\n/go;

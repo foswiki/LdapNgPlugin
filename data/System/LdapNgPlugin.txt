@@ -45,6 +45,8 @@ Parameters:
    * =reverse=: reverse the result set; possible values: on, off; default: off
    * =limit=: maximum number of records to return; default: 0 (unlimited)
    * =skip=: number of records in the hit set to skip before displaying them; default: 0 
+   * =exclude=: regular expression matched against the dn of a returned record. the record will be skipped if it matches.
+   * =include=: regular expression matched against the dn of a returned record. not matching record will be skipped.
    * =hidenull=: wether to hide any output on an empty hit set; possible values: on, off; default: off
    * =clear=: comma separated list of attributes to be removed from the output if they are not resolved
 
@@ -84,7 +86,7 @@ The =format= string may contain the following variables:
    * $index: the record number
    * $wikiName: the user's <nop>WikiName
    * $loginName: the user's login name
-   * $displayName: a link pointing to the users hometopic in the %MAINWEB% web, if it exists, and
+   * $displayName: a link pointing to the users hometopic in the %USERSWEB% web, if it exists, and
      '&lt;nop&gt;$wikiName' otherwise
    * $emails: the list of all known email addresses
  
@@ -138,6 +140,7 @@ This work was partly funded by Spanlink Communications.
 |  Release: | %$RELEASE% |
 |  Version: | %$VERSION% |
 |  Change History: | &nbsp; |
+|  17 Nov 2010: | added =exclude= and =include= parameter to %LDAP |
 |  17 Nov 2009: | renamed =sep= parameter to =separator= for consistency |
 |  27 Jan 2009: | syncing version number with <nop>LdapContrib |
 |  08 Jan 2009: | ported to foswiki |

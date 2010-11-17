@@ -1,2 +1,1 @@
 Foswiki::Contrib::LdapContrib,>=3.00,perl,Required
-Unicode::MapUTF8,>=1.11,cpan,Required. Download from CPAN:Unicode::MapUTF8 
