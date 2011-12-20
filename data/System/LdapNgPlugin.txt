@@ -135,7 +135,9 @@ The %TOPIC% will use the default configuration of the LdapContrib in your =Local
 %$DEPENDENCIES%
 
 ---++ Plugin Info
-This work was partly funded by Spanlink Communications.
+
+This work was partly funded by Spanlink Communications and Hapag Lloyd Kreuzfahrten.
+
 |  Plugin Author: | Michael Daum |
 |  Copyright &copy;: | 2006-2011 Michael Daum http://michaeldaumconsulting.com |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
