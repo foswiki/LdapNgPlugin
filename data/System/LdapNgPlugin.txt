@@ -49,6 +49,7 @@ Parameters:
    * =include=: regular expression matched against the dn of a returned record. not matching record will be skipped.
    * =hidenull=: wether to hide any output on an empty hit set; possible values: on, off; default: off
    * =clear=: comma separated list of attributes to be removed from the output if they are not resolved
+   * =cache=: time in seconds the result of the ldap query will be cached and not fetched anew; defaults to =$Foswiki::cfg{Ldap}{DefaultCacheExpire}=, or =0= if not set.
 
 Cgi Parameters:
    * =refresh=: refresh the cache of blobs (i.e. jpegPhotos); possible values: on, off; default: off;
@@ -93,17 +94,18 @@ The =format= string may contain the following variables:
 ---++ Examples
 %LDAP{"(objectClass=posixAccount)" 
   base="(ou=people)"
-  limit="10" 
-  header="| *Nr* | *Name* | *Mail* | *Photo* |$n" 
-  format="| $index | $cn | $mail | <img src=\"$jpegPhoto\" alt=\"$cn\" title=\"$cn\" width=\"100px\"> |" 
-  footer="$n<br/><font color='red'>$count users</font>" 
+  limit="100" 
+  cache="3600"
+  header="| *Nr* | *Name* | *Mail* | *Telephone* |$n" 
+  format="| $index | $cn | $mail | $telephoneNumber  |" 
   sort="cn"
-  clear="$mail,$jpegPhoto"
+  clear="$mail,$telephoneNumber, $cn"
 }%
 
 %LDAP{"(objectClass=posixGroup)" 
   base="(ou=group)" 
-  limit="10" 
+  limit="100" 
+  cache="3600"
   header="| *Nr* | *Group* | *Members* |$n" 
   format="| $index | $cn | $memberUid |" 
   clear="$mail,$memberUid"
@@ -135,11 +137,12 @@ The %TOPIC% will use the default configuration of the LdapContrib in your =Local
 ---++ Plugin Info
 This work was partly funded by Spanlink Communications.
 |  Plugin Author: | Michael Daum |
-|  Copyright &copy;: | 2006-2009 Michael Daum http://michaeldaumconsulting.com |
+|  Copyright &copy;: | 2006-2011 Michael Daum http://michaeldaumconsulting.com |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Release: | %$RELEASE% |
 |  Version: | %$VERSION% |
 |  Change History: | &nbsp; |
+|  20 Dec 2011: | added =cache= paremeter to %LDAP |
 |  17 Nov 2010: | added =exclude= and =include= parameter to %LDAP |
 |  17 Nov 2009: | renamed =sep= parameter to =separator= for consistency |
 |  27 Jan 2009: | syncing version number with <nop>LdapContrib |

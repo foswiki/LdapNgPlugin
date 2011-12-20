@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2006-2008 Michael Daum http://michaeldaumconsulting.com
+# Copyright (C) 2006-2011 Michael Daum http://michaeldaumconsulting.com
 # Portions Copyright (C) 2006 Spanlink Communications
 #
 # This program is free software; you can redistribute it and/or
@@ -17,8 +17,29 @@ package Foswiki::Plugins::LdapNgPlugin::Core;
 
 use strict;
 use Foswiki::Contrib::LdapContrib ();
+use Digest::MD5 ();
+use Cache::FileCache();
 
 use constant DEBUG => 0; # toggle me
+
+###############################################################################
+sub new {
+  my ($class, $session) = @_;
+
+  my $this = bless({
+    session => $session
+  }, $class);
+
+  $this->{cache} = new Cache::FileCache({
+    'namespace'  => 'LdapNgPlugin',
+    'cache_root' => Foswiki::Func::getWorkArea('LdapNgPlugin').'/cache/',
+    'cache_depth'     => 3,
+    'directory_umask' => 077,
+  });
+
+
+  return $this;
+}
 
 ###############################################################################
 sub writeDebug {
@@ -29,11 +50,21 @@ sub writeDebug {
 
 ###############################################################################
 sub handleLdap {
-  my ($session, $params, $topic, $web) = @_;
+  my ($this, $params, $topic, $web) = @_;
 
   #writeDebug("called handleLdap($web, $topic)");
+  my $fingerPrint = $params->stringify;
+  $fingerPrint = Digest::MD5::md5_hex($fingerPrint);
+  writeDebug("fingerPrint=$fingerPrint");
+
+  my $data = $this->{cache}->get($fingerPrint);
+  if ($data) {
+    writeDebug("found response in cache");
+    return $data;
+  }
 
   # get args
+  my $theCache = $params->{cache} || $Foswiki::cfg{Ldap}{DefaultCacheExpire};
   my $theFilter = $params->{'filter'} || $params->{_DEFAULT} || '';
   my $theBase = $params->{'base'} || $Foswiki::cfg{Ldap}{Base} || '';
   my $theHost = $params->{'host'} || $Foswiki::cfg{Ldap}{Host} || 'localhost';
@@ -70,7 +101,7 @@ sub handleLdap {
 
   # new connection
   my $ldap = new Foswiki::Contrib::LdapContrib(
-    $session,
+    $this->{session},
     base=>$theBase,
     host=>$theHost,
     port=>$thePort,
@@ -83,7 +114,7 @@ sub handleLdap {
     filter=>$theFilter, 
     base=>$theBase, 
     scope=>$theScope, 
-    limit=>($theReverse eq 'on')?0:$theLimit
+    sizelimit=>($theReverse eq 'on')?0:$theLimit
   );
   unless (defined $search) {
     return &inlineError('ERROR: '.$ldap->getError());
@@ -128,7 +159,6 @@ sub handleLdap {
   $theHeader = expandVars($theHeader,count=>$count) if $theHeader;
   $theFooter = expandVars($theFooter,count=>$count) if $theFooter;
 
-  #$result = $session->UTF82SiteCharSet($result) || $result;
   $result = $ldap->fromUtf8($result);
   $result = $theHeader.$result.$theFooter;
 
@@ -141,16 +171,20 @@ sub handleLdap {
     $result =~ s/$regex//g;
   }
 
-  return Foswiki::Func::expandCommonVariables($result, $topic, $web);
+  if ($theCache) {
+    $this->{cache}->set($fingerPrint, $result, $theCache);
+  }
+
+  return $result;
 }
 
 ###############################################################################
 sub handleLdapUsers {
-  my ($session, $params, $topic, $web) = @_;
+  my ($this, $params, $topic, $web) = @_;
 
   #writeDebug("called handleLdapUsers($web, $topic)");
 
-  my $ldap = Foswiki::Contrib::LdapContrib::getLdapContrib($session);
+  my $ldap = Foswiki::Contrib::LdapContrib::getLdapContrib($this->{session});
   my $theHeader = $params->{header} || ''; 
   my $theFormat = $params->{format} || '   1 $displayName';
   my $theFooter = $params->{footer} || '';
@@ -206,7 +240,7 @@ sub handleLdapUsers {
 
 ###############################################################################
 sub handleEmailToWikiName {
-  my ($session, $params, $topic, $web) = @_;
+  my ($this, $params, $topic, $web) = @_;
 
 
   my $theFormat = $params->{format} || '$wikiname';
