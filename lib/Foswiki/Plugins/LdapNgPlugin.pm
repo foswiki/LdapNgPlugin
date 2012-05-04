@@ -18,40 +18,49 @@ package Foswiki::Plugins::LdapNgPlugin;
 use strict;
 use vars qw($VERSION $RELEASE $core $NO_PREFS_IN_TOPIC $SHORTDESCRIPTION);
 
-$VERSION = '$Rev: 20110106 (2011-01-06) $';
-$RELEASE = '4.00';
+$VERSION           = '$Rev: 20110106 (2011-01-06) $';
+$RELEASE           = '4.00';
 $NO_PREFS_IN_TOPIC = 1;
-$SHORTDESCRIPTION = 'Query and display data from an LDAP directory';
+$SHORTDESCRIPTION  = 'Query and display data from an LDAP directory';
 
 ###############################################################################
-sub initPlugin { 
+sub initPlugin {
 
-  Foswiki::Func::registerTagHandler('LDAP', sub {
-    return getCore(shift)->handleLdap(@_);
-  });
+    Foswiki::Func::registerTagHandler(
+        'LDAP',
+        sub {
+            return getCore(shift)->handleLdap(@_);
+        }
+    );
 
-  Foswiki::Func::registerTagHandler('LDAPUSERS', sub {
-    return getCore(shift)->handleLdapUsers(@_);
-  });
+    Foswiki::Func::registerTagHandler(
+        'LDAPUSERS',
+        sub {
+            return getCore(shift)->handleLdapUsers(@_);
+        }
+    );
 
-  Foswiki::Func::registerTagHandler('EMAIL2WIKINAME', sub {
-    return getCore(shift)->handleEmailToWikiName(@_);
-  });
+    Foswiki::Func::registerTagHandler(
+        'EMAIL2WIKINAME',
+        sub {
+            return getCore(shift)->handleEmailToWikiName(@_);
+        }
+    );
 
-  $core = undef;
+    $core = undef;
 
-  return 1; 
+    return 1;
 }
 
 ###############################################################################
 sub getCore {
 
-  unless (defined $core) {
-    require Foswiki::Plugins::LdapNgPlugin::Core;
-    $core = Foswiki::Plugins::LdapNgPlugin::Core->new(@_);
-  }
+    unless ( defined $core ) {
+        require Foswiki::Plugins::LdapNgPlugin::Core;
+        $core = Foswiki::Plugins::LdapNgPlugin::Core->new(@_);
+    }
 
-  return $core;
+    return $core;
 }
 
 1;
