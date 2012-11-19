@@ -35,10 +35,10 @@ Parameters:
    * =hidenull=: wether to hide any output on an empty hit set; possible values: on, off; default: off
    * =clear=: comma separated list of attributes to be removed from the output if they are not resolved
    * =cache=: time in seconds the result of the ldap query will be cached and not fetched anew; defaults to =$Foswiki::cfg{Ldap}{DefaultCacheExpire}=, or =0= if not set.
+   * =blob=: comma separated list of attributes to be handled as blobs, like images stored in your LDAP directory.
 
 Cgi Parameters:
-   * =refresh=: refresh the cache of blobs (i.e. jpegPhotos); possible values: on, off; default: off;
-     (right now only the jpegPhoto attribute is recognized as a blob)
+   * =refresh=: refresh the cache of blobs (i.e. jpegPhotos); possible values: on, off, ldap; default: off;
 
 The =header=, =format= and =footer= format strings may contain the following variables:
    * $percnt: % sign
