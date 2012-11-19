@@ -1,23 +1,7 @@
 %META:TOPICINFO{author="ProjectContributor" date="1167752717" format="1.1" version="$Rev: 1801 $"}%
 ---+!! <nop>%TOPIC%
-<!--
-
-   PLEASE DO NOT EDIT THIS TOPIC
-
-   It is automatically generated from the subversion repository, and any changes
-   you make will simply be overwritten the next time a release is generated.
-
-   Instead, you could check your fix in, raise a bug in the Bugs web, or mail the author.
--->
 %TOC%
-<table style="float:right">
-<tr>
-  <td><img src="%ATTACHURLPATH%/wikiringlogo40x40.png"></td>
-  <td><a href="http://wikiring.com" title="Make your Wiki ring!" style="text-decoration:none">
-      Powered by <br /> <nop>WikiRing Consultants </a>
-  </td>
-</tr>
-</table>
+
 This plugin provides an interface to query an LDAP directory and display the results in a <nop>WikiApplication
 It is a complete rewrite of the Foswiki:Extensions/LdapPlugin by Gerard Hickey to provide
 greater flexibility and performance based on the Foswiki:Extensions/LdapContrib package.
@@ -46,6 +30,7 @@ Parameters:
    * =limit=: maximum number of records to return; default: 0 (unlimited)
    * =skip=: number of records in the hit set to skip before displaying them; default: 0 
    * =exclude=: regular expression matched against the dn of a returned record. the record will be skipped if it matches.
+   * =casesensitive=: switch this to off for the =exclude= and =include= parameter to operate in case-insensitive mode
    * =include=: regular expression matched against the dn of a returned record. not matching record will be skipped.
    * =hidenull=: wether to hide any output on an empty hit set; possible values: on, off; default: off
    * =clear=: comma separated list of attributes to be removed from the output if they are not resolved
@@ -77,8 +62,9 @@ Parameters:
    * =skip=: number of records in the hit set to skip before displaying them; default: 0 
    * =include=: regular expression a user's <nop>WikiName must match to be included in the output
    * =exclude=: regular expression a user's <nop>WikiName must not match
+   * =casesensitive=: switch this to off for the =exclude= and =include= parameter to operate in case-insensitive mode
    * =hideunknown=: on/off, enable/disable filtering out users that did not log in yet and thus
-     have no hometopic (e.g. created by Foswiki:Extensions/NewUsersPlugin), defaults to 'on'
+     have no hometopic (e.g. created by Foswiki:Extensions/NewUserPlugin), defaults to 'on'
 
 The =format= string may contain the following variables:
    * $percnt: % sign
@@ -136,14 +122,14 @@ The %TOPIC% will use the default configuration of the LdapContrib in your =Local
 
 ---++ Plugin Info
 
-This work was partly funded by Spanlink Communications and Hapag Lloyd Kreuzfahrten.
-
 |  Plugin Author: | Michael Daum |
-|  Copyright &copy;: | 2006-2011 Michael Daum http://michaeldaumconsulting.com |
+|  Copyright &copy;: | 2006-2012 Michael Daum http://michaeldaumconsulting.com |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Release: | %$RELEASE% |
 |  Version: | %$VERSION% |
 |  Change History: | &nbsp; |
+|  19 Nov 2012: | added casesensitive include/excluding |
+|  09 Nov 2012: | added integration into [[Foswiki:Extensions/SolrPlugin][SolrPlugin's]] index process by augmenting user profiles with ldap attributes |
 |  20 Dec 2011: | added =cache= paremeter to %LDAP |
 |  17 Nov 2010: | added =exclude= and =include= parameter to %LDAP |
 |  17 Nov 2009: | renamed =sep= parameter to =separator= for consistency |
@@ -159,8 +145,5 @@ This work was partly funded by Spanlink Communications and Hapag Lloyd Kreuzfahr
 |  31 Aug 2006: | added NO_PREFS_IN_TOPIC |
 |  19 Jul 2006: | public release |
 |  25 April 2006: | Initial (internal) version |
-|  Perl Version: | 5.8 |
 |  Plugin Home: | Foswiki:Extensions/%TOPIC% |
 |  Support: | Foswiki:Support/%TOPIC% |
-
-%META:FILEATTACHMENT{name="wikiringlogo40x40.png" attr="h" autoattached="0" comment="" date="1190996093" path="wikiringlogo40x40.png" size="2571" user="ProjectContributor" version="1"}%

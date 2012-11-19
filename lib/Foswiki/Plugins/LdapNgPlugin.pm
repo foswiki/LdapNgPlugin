@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2006-2011 Michael Daum http://michaeldaumconsulting.com
+# Copyright (C) 2006-2012 Michael Daum http://michaeldaumconsulting.com
 # Portions Copyright (C) 2006 Spanlink Communications
 #
 # This program is free software; you can redistribute it and/or
@@ -16,12 +16,13 @@
 package Foswiki::Plugins::LdapNgPlugin;
 
 use strict;
-use vars qw($VERSION $RELEASE $core $NO_PREFS_IN_TOPIC $SHORTDESCRIPTION);
+use warnings;
 
-$VERSION = '$Rev: 20110106 (2011-01-06) $';
-$RELEASE = '4.00';
-$NO_PREFS_IN_TOPIC = 1;
-$SHORTDESCRIPTION = 'Query and display data from an LDAP directory';
+our $core;
+our $VERSION = '5.00';
+our $RELEASE = '5.00';
+our $NO_PREFS_IN_TOPIC = 1;
+our $SHORTDESCRIPTION = 'Query and display data from an LDAP directory';
 
 ###############################################################################
 sub initPlugin { 
@@ -38,9 +39,36 @@ sub initPlugin {
     return getCore(shift)->handleEmailToWikiName(@_);
   });
 
+  if ($Foswiki::cfg{Plugins}{SolrPlugin}{Enabled}) {
+    require Foswiki::Plugins::SolrPlugin;
+    Foswiki::Plugins::SolrPlugin::registerIndexTopicHandler(\&indexTopicHandler);
+  }
+
   $core = undef;
 
+  push @{$Foswiki::cfg{AccessibleCFG}},
+    '{Ldap}{UserBase}',
+    '{Ldap}{GroupBase}',
+    '{Ldap}{LoginAttribute}',
+    '{Ldap}{GroupAttribute}',
+    '{Ldap}{WikiNameAttribute}',
+    '{Ldap}{PersonDataForm}';
+
   return 1; 
+}
+
+###############################################################################
+sub indexTopicHandler {
+  my $session = $Foswiki::Plugins::SESSION;
+  return getCore($session)->indexTopicHandler(@_);
+}
+
+###############################################################################
+sub finishPlugin {
+  if (defined $core) {
+    $core->finish;
+    $core = undef;
+  }
 }
 
 ###############################################################################
