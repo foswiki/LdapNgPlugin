@@ -55,7 +55,7 @@ sub finish {
 sub writeDebug {
 
   # comment me in/out
-  #&Foswiki::Func::writeDebug('- LdapNgPlugin - '.$_[0]) if DEBUG;
+  #Foswiki::Func::writeDebug('- LdapNgPlugin - '.$_[0]) if DEBUG;
   print STDERR 'LdapNgPlugin - ' . $_[0] . "\n" if DEBUG;
 }
 
@@ -66,13 +66,15 @@ sub handleLdap {
   #writeDebug("called handleLdap($web, $topic)");
   my $fingerPrint = $params->stringify;
   $fingerPrint = Digest::MD5::md5_hex($fingerPrint);
-  writeDebug("fingerPrint=$fingerPrint");
 
   my $query = Foswiki::Func::getCgiQuery();
   my $theRefresh = $query->param('refresh') || '';
   $theRefresh = 1 if $theRefresh =~ /^(on|ldap)$/;
 
-  unless ($theRefresh) {
+  my $theCache = $params->{cache};
+  $theCache = $Foswiki::cfg{Ldap}{DefaultCacheExpire} unless defined $theCache;
+
+  if ($theCache && !$theRefresh) {
     my $data = $this->{cache}->get($fingerPrint);
     if ($data) {
       writeDebug("found response in cache");
@@ -81,8 +83,6 @@ sub handleLdap {
   }
 
   # get args
-  my $theCache = $params->{cache} || $Foswiki::cfg{Ldap}{DefaultCacheExpire};
-  $theCache = $Foswiki::cfg{Ldap}{DefaultCacheExpire} unless defined $theCache;
 
   my $theFilter = $params->{'filter'} || $params->{_DEFAULT} || '';
   my $theBase = $params->{'base'} || $Foswiki::cfg{Ldap}{Base} || '';
@@ -122,7 +122,8 @@ sub handleLdap {
   my @theSort = split(/[\s,]+/, $theSort);
   $theBase = $1 . ',' . $Foswiki::cfg{Ldap}{Base} if $theBase =~ /^\((.*)\)$/;
 
-  #writeDebug("base=$theBase");
+  writeDebug("base=$theBase");
+  writeDebug("filter=$theFilter");
   #writeDebug("format=$theFormat");
 
   # new connection
@@ -136,24 +137,27 @@ sub handleLdap {
   );
 
   # search
+  my @entries = ();
   my $search = $ldap->search(
     filter => $theFilter,
     base => $theBase,
     scope => $theScope,
-    sizelimit => $theReverse ? 0 : $theLimit
+    deref=>"always",
+    sizelimit => $theReverse ? 0 : $theLimit,
+    callback => sub {
+      push @entries, $_[1];
+    }
   );
   unless (defined $search) {
-    return &inlineError('ERROR: ' . $ldap->getError());
+    return inlineError('ERROR: ' . $ldap->getError());
   }
 
-  my $count = $search->count() || 0;
-  return '' if ($count <= $theSkip) && $theHideNull;
-
   # format
-  my $result = '';
-  my @entries = $search->sorted(@theSort);
+  #@entries = $search->sorted(@theSort); SMELL: out of order
+
   @entries = reverse @entries if $theReverse;
   my $index = 0;
+  my @results = ();
   foreach my $entry (@entries) {
     my $dn = $entry->dn();
     if ($theCasesensitive) {
@@ -170,7 +174,6 @@ sub handleLdap {
     my %data;
     $data{dn} = $dn;
     $data{index} = $index;
-    $data{count} = $count;
     foreach my $attr ($entry->attributes()) {
       if ($blobAttrs{$attr}) { 
         $data{$attr} = $ldap->cacheBlob($entry, $attr, $theRefresh);
@@ -178,21 +181,16 @@ sub handleLdap {
         $data{$attr} = $ldap->toSiteCharSet($entry->get_value($attr));
       }
     }
-    my $text = '';
-    $text .= $theSep if $result;
-    $text .= $theFormat;
-    $text = expandVars($text, %data);
-    $result .= $text;
+    push @results, expandVars($theFormat, %data);
     last if $index == $theLimit;
   }
-
-  $theHeader = expandVars($theHeader, count => $count) if $theHeader;
-  $theFooter = expandVars($theFooter, count => $count) if $theFooter;
-
-  $result = $theHeader . $result . $theFooter;
   $ldap->finish();
 
-  #writeDebug("done handleLdap()");
+  my $count = scalar(@results);
+  return '' if $theHideNull && !$count;
+
+  my $result = expandVars($theHeader . join($theSep, @results) . $theFooter, count => $count);
+
   #writeDebug("result=$result");
 
   if ($theClear) {
@@ -201,10 +199,13 @@ sub handleLdap {
     $result =~ s/$regex//g;
   }
 
+  $result = decodeFormatTokens($result);
+
   if ($theCache) {
     $this->{cache}->set($fingerPrint, $result, $theCache);
   }
 
+  writeDebug("done handleLdap()");
   return $result;
 }
 
@@ -216,9 +217,7 @@ sub handleLdapUsers {
 
   my $ldap = Foswiki::Contrib::LdapContrib::getLdapContrib($this->{session});
   my $theHeader = $params->{header} || '';
-  my $theFormat = $params->{format} || '   1 $displayName';
   my $theFooter = $params->{footer} || '';
-  my $theSep = $params->{separator};
   my $theLimit = $params->{limit} || 0;
   my $theSkip = $params->{skip} || 0;
   my $theInclude = $params->{include};
@@ -226,16 +225,20 @@ sub handleLdapUsers {
   my $theCasesensitive = Foswiki::Func::isTrue($params->{casesensitive}, 1);
   my $theHideUnknownUsers = Foswiki::Func::isTrue($params->{hideunknown}, 1);
 
+  my $theFormat = $params->{format};
+  $theFormat = '   1 $displayName' unless defined $theFormat;
+
+  my $theSep = $params->{separator};
   $theSep = $params->{sep} unless defined $theSep;
   $theSep = '$n' unless defined $theSep;
 
-  my $mainWeb = Foswiki::Func::getMainWebname();
+  my $usersWeb = $Foswiki::cfg{UsersWebName};
   my $wikiNames = $ldap->getAllWikiNames();
-  my $result = '';
   $theSkip =~ s/[^\d]//go;
   $theLimit =~ s/[^\d]//go;
 
   my $index = 0;
+  my @result = ();
   foreach my $wikiName (sort @$wikiNames) {
     if ($theCasesensitive) {
       next if $theExclude && $wikiName =~ /$theExclude/;
@@ -248,19 +251,17 @@ sub handleLdapUsers {
     my $emailAddrs = $ldap->getEmails($loginName);
     my $distinguishedName = $ldap->getDnOfLogin($loginName) || '';
     my $displayName;
-    if (Foswiki::Func::topicExists($mainWeb, $wikiName)) {
-      $displayName = "[[$mainWeb.$wikiName][$wikiName]]";
+
+    if (Foswiki::Func::topicExists($usersWeb, $wikiName)) {
+      $displayName = "[[$usersWeb.$wikiName]]";
     } else {
       next if $theHideUnknownUsers;
       $displayName = "<nop>$wikiName";
     }
     $index++;
     next if $index <= $theSkip;
-    my $line;
-    $line = $theSep if $result;
-    $line .= $theFormat;
-    $line = expandVars(
-      $line,
+    push @result, expandVars(
+      $theFormat,
       index => $index,
       wikiName => $wikiName,
       displayName => $displayName,
@@ -268,11 +269,13 @@ sub handleLdapUsers {
       loginName => $loginName,
       emails => $emailAddrs
     );
-    $result .= $line;
     last if $index == $theLimit;
   }
 
-  return expandVars($theHeader) . $result . expandVars($theFooter);
+  my $result = $theHeader. join($theSep, @result) . $theFooter;
+  $result = expandVars($result, count => scalar(@result));
+
+  return decodeFormatTokens($result);
 }
 
 ###############################################################################
@@ -288,14 +291,14 @@ sub handleEmailToWikiName {
   $theSep = ', ' unless defined $theSep;
 
   my @wikiNames = Foswiki::Func::emailToWikiNames($theEmail, 1);
-  my $mainWeb = Foswiki::Func::getMainWebname();
+  my $usersWeb = $Foswiki::cfg{UsersWebName};
   my @result = ();
   my $count = scalar(@wikiNames);
   my $index = 0;
   foreach my $wikiName (sort @wikiNames) {
     $index++;
     my $line = $theFormat;
-    my $wikiUserName = $mainWeb . '.' . $wikiName;
+    my $wikiUserName = $usersWeb . '.' . $wikiName;
     $line =~ s/\$wikiname/$wikiName/g;
     $line =~ s/\$wikiusername/$wikiUserName/g;
     $line =~ s/\$index/$index/g;
@@ -316,6 +319,19 @@ sub inlineError {
 }
 
 ###############################################################################
+sub decodeFormatTokens {
+  my $text = shift;
+
+  $text =~ s/\$nop//g;
+  $text =~ s/\$n/\n/g;
+  $text =~ s/\$quot/\"/g;
+  $text =~ s/\$percnt/\%/g;
+  $text =~ s/\$dollar/\$/g;
+
+  return $text;
+}
+
+###############################################################################
 sub expandVars {
   my ($format, %data) = @_;
 
@@ -326,21 +342,19 @@ sub expandVars {
     next unless defined $value;
     $value = join(', ', sort @$value) if ref($data{$key}) eq 'ARRAY';
 
-    # Format list values using the '$' delimiter in multiple lines; see rfc4517
-    $value =~ s/([^\\])\$/$1<br \/>/go;
-    $value =~ s/\\\$/\$/go;
-    $value =~ s/\\\\/\\/go;
+    # format list values using the '$' delimiter in multiple lines; see rfc4517
+    # The only attribute I've seen so far where this rule should be used is in in postalAddress.
+    # In most other cases this hurts a lot more than anything else.
+    if ($key =~ /^(postalAddress)$/) { # TODO: make this rule configurable
+      $value =~ s/([^\\])\$/$1<br \/>/go;
+      $value =~ s/\\\$/\$/go;
+      $value =~ s/\\\\/\\/go;
+    }
 
     $format =~ s/\$$key\b/$value/gi;
 
     #writeDebug("$key=$value");
   }
-
-  $format =~ s/\$nop//go;
-  $format =~ s/\$n/\n/go;
-  $format =~ s/\$quot/\"/go;
-  $format =~ s/\$percnt/\%/go;
-  $format =~ s/\$dollar/\$/go;
 
   #writeDebug("done expandVars()");
   return $format;
@@ -373,7 +387,7 @@ sub indexTopicHandler {
 
   my @emails = Foswiki::Func::wikinameToEmails($wikiName);
 
-  print STDERR "wikiName='$wikiName', loginName=$loginName, emails=" . join(", ", @emails) . "\n";
+  #print STDERR "wikiName='$wikiName', loginName=$loginName, emails=" . join(", ", @emails) . "\n";
 
   if ($Foswiki::cfg{Ldap}{IndexEmails}) {
     my $email = shift @emails;    # SMELL: taking only the first known one
@@ -388,7 +402,7 @@ sub indexTopicHandler {
 
   my $filter = "$ldap->{loginAttribute}=$loginName";
 
-  #print STDERR "filter=$filter\n";
+  #print STDERR "filter='$filter'\n";
   my $entry;
   my $search = $ldap->search(
     filter => $filter,
@@ -424,9 +438,9 @@ sub _set_field {
   foreach my $field ($doc->fields) {
     if ($field->{name} eq $name) {
       if ($Foswiki::cfg{Ldap}{PreferLocalSettings} && $field->{value}) {
-        print STDERR "keeping field $name = $val from local settings\n";
+        #print STDERR "keeping field $name = $val from local settings\n";
       } else {
-        print STDERR "setting field $name to $val (was '$field->{value}')\n";
+        #print STDERR "setting field $name to $val (was '$field->{value}')\n";
         $field->{value} = $val;
       }
       return;
