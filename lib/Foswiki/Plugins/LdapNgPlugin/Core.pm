@@ -47,8 +47,6 @@ sub finish {
   my $this = shift;
 
   $this->{cache} = undef;
-  $this->{_ldap}->finish() if defined $this->{_ldap};
-  $this->{_ldap} = undef;
 }
 
 ###############################################################################
@@ -142,7 +140,6 @@ sub handleLdap {
     filter => $theFilter,
     base => $theBase,
     scope => $theScope,
-    deref=>"always",
     sizelimit => $theReverse ? 0 : $theLimit,
     callback => sub {
       push @entries, $_[1];
@@ -178,7 +175,7 @@ sub handleLdap {
       if ($blobAttrs{$attr}) { 
         $data{$attr} = $ldap->cacheBlob($entry, $attr, $theRefresh);
       } else {
-        $data{$attr} = $ldap->toSiteCharSet($entry->get_value($attr));
+        $data{$attr} = $ldap->fromLdapCharSet($entry->get_value($attr));
       }
     }
     push @results, expandVars($theFormat, %data);
@@ -325,7 +322,7 @@ sub decodeFormatTokens {
   $text =~ s/\$nop//g;
   $text =~ s/\$n/\n/g;
   $text =~ s/\$quot/\"/g;
-  $text =~ s/\$percnt/\%/g;
+  $text =~ s/\$perce?nt/\%/g;
   $text =~ s/\$dollar/\$/g;
 
   return $text;
@@ -391,19 +388,18 @@ sub indexTopicHandler {
 
   if ($Foswiki::cfg{Ldap}{IndexEmails}) {
     my $email = shift @emails;    # SMELL: taking only the first known one
-    _set_field($doc, 'field_Email_s', $email);
-    _set_field($doc, 'field_Email_search', $email);
+    if ($email) {
+      _set_field($doc, 'field_Email_s', $email);
+      _set_field($doc, 'field_Email_search', $email);
+    }
   }
 
-  my $ldap = $this->{_ldap};
-  unless (defined $ldap) {
-    $ldap = $this->{_ldap} = new Foswiki::Contrib::LdapContrib($this->{session});
-  }
-
+  my $ldap = new Foswiki::Contrib::LdapContrib($this->{session});
   my $filter = "$ldap->{loginAttribute}=$loginName";
 
   #print STDERR "filter='$filter'\n";
   my $entry;
+  
   my $search = $ldap->search(
     filter => $filter,
     limit => 1,
@@ -420,16 +416,22 @@ sub indexTopicHandler {
     return;
   }
 
+  my $ldapCharSet = $Foswiki::cfg{Ldap}{CharSet} || 'utf-8';
   foreach my $attr ($entry->attributes()) {
-    my $value = $ldap->toSiteCharSet($entry->get_value($attr));
-    my $label = $personAttributes->{$attr};
+    my $value = $entry->get_value($attr);
     next unless defined $value && $value ne '';
 
+    # SMELL: do we need to encode it to utf-8?
+    $value = Encode::decode($ldapCharSet, $value);
+
+    my $label = $personAttributes->{$attr};
     #print STDERR "$label: $value\n";
 
     _set_field($doc, 'field_' . $label . '_s', $value);
     _set_field($doc, 'field_' . $label . '_search', $value);
   }
+
+  $ldap->finish();
 }
 
 sub _set_field {

@@ -128,6 +128,10 @@ The %TOPIC% will use the default configuration of the LdapContrib in your =Local
 |  Release: | %$RELEASE% |
 |  Version: | %$VERSION% |
 |  Change History: | &nbsp; |
+|  29 Nov 2012: | fixed performance problem for simple queries; \
+                  fixes due to the latest changes in <nop>LdapContrib; \
+                  fixed too many open file handles on long running solrindexing; \
+                  don't index empty email fields using <nop>SolrPlugin |
 |  21 Nov 2012: | fixed switching off the %LDAP cache when there's a global default; \
                   rewrite of formatting code; \
                   fixed fetching referrenced objects |
