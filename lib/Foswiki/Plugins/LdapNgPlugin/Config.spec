@@ -52,4 +52,9 @@ $Foswiki::cfg{Ldap}{PreferLocalSettings} = 1;
 # Setting this to 0 will disable default caching. You might enable caching per <code>%LDAP{cache="..."</code> again as required.
 $Foswiki::cfg{Ldap}{DefaultCacheExpire} = 0;
 
+# **BOOLEAN**
+# Enable this to make all user topics findable no matter which view access rights they have. This comes in handy in cases where an employee search
+# application is supposed to find all user profiles no matter what.
+$Foswiki::cfg{Ldap}{IgnoreViewRightsInSearch} = 0;
+
 1;

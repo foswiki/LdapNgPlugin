@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" date="1167752717" format="1.1" version="$Rev: 1801 $"}%
+%META:TOPICINFO{author="ProjectContributor" comment="autosave" date="1356278775" format="1.1" version="1"}%
 ---+!! <nop>%TOPIC%
 %TOC%
 
@@ -25,7 +25,7 @@ Parameters:
    * =header=: header to prepend the output; default: '$dn'
    * =footer=: footer to appended to the output
    * =separator=: separator between database records; default: '$n'
-   * =sort=: name of attributes to sort the output
+   * =sort=: name of attributes to sort the output %RED%(this feature is currently disabled)%ENDCOLOR%
    * =reverse=: reverse the result set; possible values: on, off; default: off
    * =limit=: maximum number of records to return; default: 0 (unlimited)
    * =skip=: number of records in the hit set to skip before displaying them; default: 0 
@@ -123,11 +123,14 @@ The %TOPIC% will use the default configuration of the LdapContrib in your =Local
 ---++ Plugin Info
 
 |  Plugin Author: | Michael Daum |
-|  Copyright &copy;: | 2006-2012 Michael Daum http://michaeldaumconsulting.com |
+|  Copyright &copy;: | 2006-2014 Michael Daum http://michaeldaumconsulting.com |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Release: | %$RELEASE% |
 |  Version: | %$VERSION% |
 |  Change History: | &nbsp; |
+|  18 Mar 2014: | disable sorting temporarily as =Net::LDAP::Search::sorted()= destroys the result set on directories with references; \
+                  added =IgnoreViewRightsInSearch= feature when indexing <nop>UserTopics using [[Foswiki:Extensions/SolrPlugin][SolrPlugin]]; \
+                  properly recode strings coming from the directory |
 |  29 Nov 2012: | fixed performance problem for simple queries; \
                   fixes due to the latest changes in <nop>LdapContrib; \
                   fixed too many open file handles on long running solrindexing; \

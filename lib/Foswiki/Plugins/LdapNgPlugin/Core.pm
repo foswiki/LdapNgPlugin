@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2006-2012 Michael Daum http://michaeldaumconsulting.com
+# Copyright (C) 2006-2014 Michael Daum http://michaeldaumconsulting.com
 # Portions Copyright (C) 2006 Spanlink Communications
 #
 # This program is free software; you can redistribute it and/or
@@ -21,6 +21,7 @@ use warnings;
 use Foswiki::Contrib::LdapContrib ();
 use Digest::MD5 ();
 use Cache::FileCache();
+use Encode ();
 
 use constant DEBUG => 0;    # toggle me
 
@@ -149,8 +150,9 @@ sub handleLdap {
     return inlineError('ERROR: ' . $ldap->getError());
   }
 
-  # format
-  #@entries = $search->sorted(@theSort); SMELL: out of order
+  # DISABLED: as it destroys the @entries array colleced while following references etc
+  # TODO: use our own sorting or borrow from Net::LDAP::Search
+  #@entries = $search->sorted(@theSort); 
 
   @entries = reverse @entries if $theReverse;
   my $index = 0;
@@ -412,23 +414,26 @@ sub indexTopicHandler {
   );
 
   unless ($entry) {
-    print STDERR "ERROR: $loginName not found in LDAP directory\n";
+    #print STDERR "$loginName not found in LDAP directory\n";
     return;
   }
 
-  my $ldapCharSet = $Foswiki::cfg{Ldap}{CharSet} || 'utf-8';
   foreach my $attr ($entry->attributes()) {
     my $value = $entry->get_value($attr);
     next unless defined $value && $value ne '';
 
-    # SMELL: do we need to encode it to utf-8?
-    $value = Encode::decode($ldapCharSet, $value);
+    $value = $ldap->fromLdapCharSet($value);
 
     my $label = $personAttributes->{$attr};
     #print STDERR "$label: $value\n";
 
     _set_field($doc, 'field_' . $label . '_s', $value);
     _set_field($doc, 'field_' . $label . '_search', $value);
+  }
+
+  if ($Foswiki::cfg{Ldap}{IgnoreViewRightsInSearch}) {
+    writeDebug("ignoring access in search for $web.$topic");
+    $doc->add_fields('access_granted' => 'all');
   }
 
   $ldap->finish();
