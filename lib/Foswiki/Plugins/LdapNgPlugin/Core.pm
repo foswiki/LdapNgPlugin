@@ -23,7 +23,7 @@ use Digest::MD5 ();
 use Cache::FileCache();
 use Encode ();
 
-use constant DEBUG => 0;    # toggle me
+use constant TRACE => 0;    # toggle me
 
 ###############################################################################
 sub new {
@@ -54,8 +54,8 @@ sub finish {
 sub writeDebug {
 
   # comment me in/out
-  #Foswiki::Func::writeDebug('- LdapNgPlugin - '.$_[0]) if DEBUG;
-  print STDERR 'LdapNgPlugin - ' . $_[0] . "\n" if DEBUG;
+  #Foswiki::Func::writeDebug('- LdapNgPlugin - '.$_[0]) if TRACE;
+  print STDERR 'LdapNgPlugin - ' . $_[0] . "\n" if TRACE;
 }
 
 ###############################################################################
