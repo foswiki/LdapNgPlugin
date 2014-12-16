@@ -1,4 +1,5 @@
 data/System/LdapNgPlugin.txt 0644
+data/System/LdapWikiUsersViewTemplate.txt 0644
 lib/Foswiki/Plugins/LdapNgPlugin/Config.spec 0644
 lib/Foswiki/Plugins/LdapNgPlugin/Core.pm 0644
 lib/Foswiki/Plugins/LdapNgPlugin.pm 0644

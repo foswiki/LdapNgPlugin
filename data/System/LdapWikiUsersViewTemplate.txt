@@ -1,0 +1,18 @@
+%META:TOPICINFO{author="ProjectContributor" comment="" date="1418737821" format="1.1" version="1"}%
+
+%{<verbatim>}%
+%TMPL:INCLUDE{"WikiUsersView"}%<!-- -->
+%{</verbatim>}%
+
+%{<verbatim>}%
+%TMPL:DEF{"userlist::result"}%<!-- -->
+<noautolink>
+<div class="userlistContainer">
+%LDAPUSERS{
+  format="$percntTMPL:P{\"userlist::format\" OBJECT=\"%USERSWEB%.$wikiname\"}$percnt"
+}%
+%CLEAR%
+</div>
+</noautolink>
+<!-- -->%TMPL:END%
+%{</verbatim>}%

@@ -380,6 +380,12 @@ sub indexTopicHandler {
   my $loginName = Foswiki::Func::wikiToUserName($wikiName);
 
   unless ($loginName) {
+    print STDERR "WARNING: can't find loginName for $wikiName in user database ... trying LDAP directy\n";
+    my $ldap = Foswiki::Contrib::LdapContrib::getLdapContrib($this->{session});
+    $loginName = $ldap->getLoginOfWikiName($wikiName);
+  }
+
+  unless ($loginName) {
     print STDERR "WARNING: can't find loginName for $wikiName in user database ... alumni?\n";
     return;
   }

@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="ProjectContributor" comment="autosave" date="1356278775" format="1.1" version="1"}%
+%META:TOPICINFO{author="ProjectContributor" comment="" date="1418737821" format="1.1" version="1"}%
 ---+!! <nop>%TOPIC%
 %TOC%
 
@@ -78,6 +78,9 @@ The =format= string may contain the following variables:
    * $emails: the list of all known email addresses
  
 ---++ Examples
+
+---+++ Query user accounts
+<verbatim class="tml">
 %LDAP{"(objectClass=posixAccount)" 
   base="(ou=people)"
   limit="100" 
@@ -87,7 +90,11 @@ The =format= string may contain the following variables:
   sort="cn"
   clear="$mail,$telephoneNumber, $cn"
 }%
+</verbatim>
 
+---+++ Query user groups
+
+<verbatim class="tml">
 %LDAP{"(objectClass=posixGroup)" 
   base="(ou=group)" 
   limit="100" 
@@ -97,8 +104,14 @@ The =format= string may contain the following variables:
   clear="$mail,$memberUid"
   sort="cn"
 }%
+</verbatim>
 
+---+++ Display cached users records
+
+<verbatim class="tml">
 %LDAPUSERS{limit="10"}%
+</verbatim>
+
 
 ---++ Plugin Settings
 <!-- provided for compatibility only
@@ -117,6 +130,28 @@ The %TOPIC% will use the default configuration of the LdapContrib in your =Local
 ---++ Plugin Installation Instructions
 %$INSTALL_INSTRUCTIONS%
 
+If you are using %TOPIC% together with LdapContrib to integrate LDAP users to Foswiki you might also want
+to display an according list of all [[%USERSWEB%.WikiUsers]]. Therefore %TOPIC% comes with a [[LdapWikiUsersViewTemplate][view template]]
+that you have to apply to the <nop>WikiUsers topic. Do so either by adding
+
+<verbatim class="tml">   * Set VIEW_TEMPLATE = LdapWikiUsersView</verbatim>
+
+or by adding 
+
+<verbatim>
+$Foswiki::cfg{Plugins}{AutoTemplatePlugin}{ViewTemplateRules} = {
+...
+    'WikiUsers' => 'LdapWikiUsersView',
+...
+};
+</verbatim>
+
+to your =LocalSite.cfg= in case Foswiki:Extensions/AutoTemplatePlugin is installed as well. 
+
+Please do _not_ use the =LdapWikiUsersView= template in case your are running Foswiki:Extensions/SolrPlugin as well which
+implements a fast solr-based person search with a different =SolrWikiUsersView= template.
+
+
 ---++ Dependencies
 %$DEPENDENCIES%
 
@@ -128,6 +163,9 @@ The %TOPIC% will use the default configuration of the LdapContrib in your =Local
 |  Release: | %$RELEASE% |
 |  Version: | %$VERSION% |
 |  Change History: | &nbsp; |
+|  16 Dec 2014: | added view template for [[%USERSWEB%.WikiUsers]]; \
+                  more robust extraction of user information while indexing profiles with Foswiki:Extensions/SolrPlugin; \
+                  wrapping examples into verbatim sections not to expose usernames by default |
 |  18 Mar 2014: | disable sorting temporarily as =Net::LDAP::Search::sorted()= destroys the result set on directories with references; \
                   added =IgnoreViewRightsInSearch= feature when indexing <nop>UserTopics using [[Foswiki:Extensions/SolrPlugin][SolrPlugin]]; \
                   properly recode strings coming from the directory |
