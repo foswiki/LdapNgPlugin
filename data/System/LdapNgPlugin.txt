@@ -158,11 +158,12 @@ implements a fast solr-based person search with a different =SolrWikiUsersView= 
 ---++ Plugin Info
 
 |  Plugin Author: | Michael Daum |
-|  Copyright &copy;: | 2006-2014 Michael Daum http://michaeldaumconsulting.com |
+|  Copyright &copy;: | 2006-2015 Michael Daum http://michaeldaumconsulting.com |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Release: | %$RELEASE% |
 |  Version: | %$VERSION% |
 |  Change History: | &nbsp; |
+|  31 Aug 2015: | added support to index profile images stored in LDAP and indexed in Solr |
 |  16 Dec 2014: | added view template for [[%USERSWEB%.WikiUsers]]; \
                   more robust extraction of user information while indexing profiles with Foswiki:Extensions/SolrPlugin; \
                   wrapping examples into verbatim sections not to expose usernames by default |

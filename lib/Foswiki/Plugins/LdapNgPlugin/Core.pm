@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2006-2014 Michael Daum http://michaeldaumconsulting.com
+# Copyright (C) 2006-2015 Michael Daum http://michaeldaumconsulting.com
 # Portions Copyright (C) 2006 Spanlink Communications
 #
 # This program is free software; you can redistribute it and/or
@@ -431,10 +431,21 @@ sub indexTopicHandler {
     $value = $ldap->fromLdapCharSet($value);
 
     my $label = $personAttributes->{$attr};
-    #print STDERR "$label: $value\n";
 
-    _set_field($doc, 'field_' . $label . '_s', $value);
-    _set_field($doc, 'field_' . $label . '_search', $value);
+    if ($label eq 'thumbnail') {
+      my $value = $ldap->cacheBlob($entry, $attr);
+      next unless defined $value && $value ne '';
+
+      $doc->add_fields($label => $value);
+    } else {
+      my $value = $entry->get_value($attr);
+      next unless defined $value && $value ne '';
+
+      $value = $ldap->fromLdapCharSet($value);
+
+      _set_field($doc, 'field_' . $label . '_s', $value);
+      _set_field($doc, 'field_' . $label . '_search', $value);
+    }
   }
 
   if ($Foswiki::cfg{Ldap}{IgnoreViewRightsInSearch}) {
