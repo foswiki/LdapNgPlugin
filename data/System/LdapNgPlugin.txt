@@ -25,6 +25,9 @@ Parameters:
    * =header=: header to prepend the output; default: '$dn'
    * =footer=: footer to appended to the output
    * =separator=: separator between database records; default: '$n'
+   * =multivaluejoiner=: string to be used when joining multiple-values; 
+     if =multivaluejoiner= is set, multiple attribute values are joined by this string.
+     Without this, only the first of multiple values is displayed. Example: ', '
    * =sort=: name of attributes to sort the output %RED%(this feature is currently disabled)%ENDCOLOR%
    * =reverse=: reverse the result set; possible values: on, off; default: off
    * =limit=: maximum number of records to return; default: 0 (unlimited)
