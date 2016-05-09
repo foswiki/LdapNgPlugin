@@ -177,7 +177,11 @@ sub handleLdap {
       if ($blobAttrs{$attr}) { 
         $data{$attr} = $ldap->cacheBlob($entry, $attr, $theRefresh);
       } else {
-        $data{$attr} = $ldap->fromLdapCharSet($entry->get_value($attr));
+	if (defined $params->{multivaluejoiner}) {
+	  $data{$attr} = $ldap->fromLdapCharSet( join($params->{multivaluejoiner}, $entry->get_value($attr)) );
+	} else {
+	  $data{$attr} = $ldap->fromLdapCharSet($entry->get_value($attr));
+        }
       }
     }
     push @results, expandVars($theFormat, %data);
