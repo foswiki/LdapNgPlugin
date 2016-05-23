@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2006-2015 Michael Daum http://michaeldaumconsulting.com
+# Copyright (C) 2006-2016 Michael Daum http://michaeldaumconsulting.com
 # Portions Copyright (C) 2006 Spanlink Communications
 #
 # This program is free software; you can redistribute it and/or
@@ -72,6 +72,7 @@ sub handleLdap {
 
   my $theCache = $params->{cache};
   $theCache = $Foswiki::cfg{Ldap}{DefaultCacheExpire} unless defined $theCache;
+  $theCache = 0 if $theCache eq 'off';
 
   if ($theCache && !$theRefresh) {
     my $data = $this->{cache}->get($fingerPrint);
@@ -113,6 +114,9 @@ sub handleLdap {
   my $theSep = $params->{separator};
   $theSep = $params->{sep} unless defined $theSep;
   $theSep = '$n' unless defined $theSep;
+
+  my $theValueSep = $params->{value_separator};
+  $theValueSep = ", " unless defined $theValueSep;
 
 
   # fix args
@@ -177,7 +181,7 @@ sub handleLdap {
       if ($blobAttrs{$attr}) { 
         $data{$attr} = $ldap->cacheBlob($entry, $attr, $theRefresh);
       } else {
-        $data{$attr} = $ldap->fromLdapCharSet($entry->get_value($attr));
+        $data{$attr} = $ldap->fromLdapCharSet(join($theValueSep, $entry->get_value($attr)));
       }
     }
     push @results, expandVars($theFormat, %data);
@@ -425,11 +429,6 @@ sub indexTopicHandler {
   }
 
   foreach my $attr ($entry->attributes()) {
-    my $value = $entry->get_value($attr);
-    next unless defined $value && $value ne '';
-
-    $value = $ldap->fromLdapCharSet($value);
-
     my $label = $personAttributes->{$attr};
 
     if ($label eq 'thumbnail') {
@@ -438,10 +437,10 @@ sub indexTopicHandler {
 
       $doc->add_fields($label => $value);
     } else {
-      my $value = $entry->get_value($attr);
-      next unless defined $value && $value ne '';
+      my @values = $entry->get_value($attr);
+      next unless @values;
 
-      $value = $ldap->fromLdapCharSet($value);
+      my $value = $ldap->fromLdapCharSet(join(", ", @values)); # SMELL: do we want index as an _lst?
 
       _set_field($doc, 'field_' . $label . '_s', $value);
       _set_field($doc, 'field_' . $label . '_search', $value);

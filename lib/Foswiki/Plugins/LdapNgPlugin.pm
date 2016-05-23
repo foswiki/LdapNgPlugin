@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2006-2015 Michael Daum http://michaeldaumconsulting.com
+# Copyright (C) 2006-2016 Michael Daum http://michaeldaumconsulting.com
 # Portions Copyright (C) 2006 Spanlink Communications
 #
 # This program is free software; you can redistribute it and/or
@@ -19,8 +19,8 @@ use strict;
 use warnings;
 
 our $core;
-our $VERSION = '6.10';
-our $RELEASE = '31 Aug 2015';
+our $VERSION = '6.20';
+our $RELEASE = '23 May 2016';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION = 'Query and display data from an LDAP directory';
 
