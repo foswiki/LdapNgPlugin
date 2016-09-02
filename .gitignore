@@ -1,8 +1,8 @@
 *.swp
-LdapNgPlugin.md5
-LdapNgPlugin.sha1
-LdapNgPlugin.tgz
-LdapNgPlugin.txt
-LdapNgPlugin.zip
-LdapNgPlugin_installer
-LdapNgPlugin_installer.pl
+/LdapNgPlugin.md5
+/LdapNgPlugin.sha1
+/LdapNgPlugin.tgz
+/LdapNgPlugin.txt
+/LdapNgPlugin.zip
+/LdapNgPlugin_installer
+/LdapNgPlugin_installer.pl

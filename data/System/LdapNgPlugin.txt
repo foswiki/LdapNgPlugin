@@ -24,6 +24,7 @@ Parameters:
      base of the LdapContrib
    * =scope=: scope of search; possible values: sub, base, one
    * =format=: format string used to display a database record
+   * =nullformat=: format string to be used when no results have been found, defaults to the empty string
    * =header=: header to prepend the output; default: '$dn'
    * =footer=: footer to appended to the output
    * =separator=: separator between database records; default: '$n'
@@ -157,6 +158,7 @@ implements a fast solr-based person search with a different =SolrWikiUsersView= 
 %$DEPENDENCIES%
 
 ---++ Change History
+|  02 Sep 2016: | added =nullformat= parameter to %LDAP macro |
 |  23 May 2016: | added =value_separator= to fetch multi-value attributes from LDAP |
 |  31 Aug 2015: | added support to index profile images stored in LDAP and indexed in Solr |
 |  16 Dec 2014: | added view template for [[%USERSWEB%.WikiUsers]]; \

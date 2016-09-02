@@ -99,6 +99,7 @@ sub handleLdap {
   my $theLimit = $params->{limit} || 0;
   my $theSkip = $params->{skip} || 0;
   my $theHideNull = Foswiki::Func::isTrue($params->{hidenull}, 0);
+  my $theNullFormat = $params->{nullformat} || '';
   my $theClear = $params->{clear} || '';
   my $theExclude = $params->{exclude} || '';
   my $theInclude = $params->{include} || '';
@@ -190,7 +191,9 @@ sub handleLdap {
   $ldap->finish();
 
   my $count = scalar(@results);
-  return '' if $theHideNull && !$count;
+  unless ($count) {
+    return $theHideNull?"":$theNullFormat;
+  }
 
   my $result = expandVars($theHeader . join($theSep, @results) . $theFooter, count => $count);
 
