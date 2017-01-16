@@ -158,6 +158,8 @@ implements a fast solr-based person search with a different =SolrWikiUsersView= 
 %$DEPENDENCIES%
 
 ---++ Change History
+%TABLE{columnwidths="7em" tablewidth="100%"}%
+|  16 Jan 2017: | fix querying for users at all of the DNs configured in ={<nop>UserBase}= |
 |  02 Sep 2016: | added =nullformat= parameter to %LDAP macro |
 |  23 May 2016: | added =value_separator= to fetch multi-value attributes from LDAP |
 |  31 Aug 2015: | added support to index profile images stored in LDAP and indexed in Solr |
@@ -194,7 +196,7 @@ implements a fast solr-based person search with a different =SolrWikiUsersView= 
 
 %META:FORM{name="PackageForm"}%
 %META:FIELD{name="Author" title="Author" value="Michael Daum"}%
-%META:FIELD{name="Copyright" title="Copyright" value="2006-2016 Michael Daum http://michaeldaumconsulting.com"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2006-2017 Michael Daum http://michaeldaumconsulting.com"}%
 %META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
 %META:FIELD{name="Home" title="Home" value="Foswiki:Extensions/%TOPIC%"}%
 %META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%

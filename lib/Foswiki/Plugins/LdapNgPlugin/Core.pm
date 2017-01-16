@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2006-2016 Michael Daum http://michaeldaumconsulting.com
+# Copyright (C) 2006-2017 Michael Daum http://michaeldaumconsulting.com
 # Portions Copyright (C) 2006 Spanlink Communications
 #
 # This program is free software; you can redistribute it and/or
@@ -415,16 +415,22 @@ sub indexTopicHandler {
   #print STDERR "filter='$filter'\n";
   my $entry;
   
-  my $search = $ldap->search(
-    filter => $filter,
-    limit => 1,
-    attrs => [ keys %$personAttributes ],
-    callback => sub {
-      my (undef, $result) = @_;
-      return unless defined $result;
-      $entry = $result;
-    },
-  );
+  foreach my $userBase (@{$ldap->{userBase}}) {
+    my $msg = $ldap->search(
+      filter => $filter,
+      limit => 1,
+      base => $userBase,
+      deref => "always",
+      attrs => [ keys %$personAttributes ],
+      callback => sub {
+        my (undef, $result) = @_;
+        return unless defined $result;
+        $entry = $result;
+      }
+    );
+
+    last if $entry;
+  }
 
   unless ($entry) {
     #print STDERR "$loginName not found in LDAP directory\n";
