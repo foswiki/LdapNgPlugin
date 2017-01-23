@@ -19,7 +19,7 @@ use strict;
 use warnings;
 
 our $core;
-our $VERSION = '6.40';
+our $VERSION = '6.41';
 our $RELEASE = '16 Jan 2017';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION = 'Query and display data from an LDAP directory';
@@ -39,7 +39,7 @@ sub initPlugin {
     return getCore(shift)->handleEmailToWikiName(@_);
   });
 
-  if ($Foswiki::cfg{Plugins}{SolrPlugin}{Enabled}) {
+  if ($Foswiki::cfg{Plugins}{SolrPlugin} && $Foswiki::cfg{Plugins}{SolrPlugin}{Enabled}) {
     require Foswiki::Plugins::SolrPlugin;
     Foswiki::Plugins::SolrPlugin::registerIndexTopicHandler(\&indexTopicHandler);
   }
