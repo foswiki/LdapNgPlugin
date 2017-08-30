@@ -182,7 +182,7 @@ sub handleLdap {
       if ($blobAttrs{$attr}) { 
         $data{$attr} = $ldap->cacheBlob($entry, $attr, $theRefresh);
       } else {
-        $data{$attr} = $ldap->fromLdapCharSet(join($theValueSep, $entry->get_value($attr)));
+        $data{$attr} = join($theValueSep, $ldap->getValues($entry, $attr));
       }
     }
     push @results, expandVars($theFormat, %data);
@@ -446,10 +446,10 @@ sub indexTopicHandler {
 
       $doc->add_fields($label => $value);
     } else {
-      my @values = $entry->get_value($attr);
+      my @values = $ldap->getValues($entry, $attr);
       next unless @values;
+      my $value = join(", ", @values); 
 
-      my $value = $ldap->fromLdapCharSet(join(", ", @values)); # SMELL: do we want index as an _lst?
 
       _set_field($doc, 'field_' . $label . '_s', $value);
       _set_field($doc, 'field_' . $label . '_search', $value);

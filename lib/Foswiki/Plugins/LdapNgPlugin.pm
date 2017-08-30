@@ -19,8 +19,8 @@ use strict;
 use warnings;
 
 our $core;
-our $VERSION = '6.41';
-our $RELEASE = '16 Jan 2017';
+our $VERSION = '6.42';
+our $RELEASE = '30 Aug 2017';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION = 'Query and display data from an LDAP directory';
 
