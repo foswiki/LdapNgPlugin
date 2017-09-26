@@ -1,5 +1,7 @@
 %META:TOPICINFO{author="ProjectContributor" comment="" date="1418737821" format="1.1" version="1"}%
----+!! <nop>%TOPIC%
+---+!! %TOPIC%
+%FORMFIELD{"Description"}%
+
 %TOC%
 
 This plugin provides an interface to query an LDAP directory and display the results in a <nop>WikiApplication
@@ -22,11 +24,12 @@ Parameters:
      base of the LdapContrib
    * =scope=: scope of search; possible values: sub, base, one
    * =format=: format string used to display a database record
+   * =nullformat=: format string to be used when no results have been found, defaults to the empty string
    * =header=: header to prepend the output; default: '$dn'
    * =footer=: footer to appended to the output
    * =separator=: separator between database records; default: '$n'
-   * =multivaluejoiner=: string to be used when joining multiple-values; 
-     if =multivaluejoiner= is set, multiple attribute values are joined by this string.
+   * =value_separator=: separator when joining list values; default: undefined
+     if =value_separator= is set, multiple attribute values are joined by this string.
      Without this, only the first of multiple values is displayed. Example: ', '
    * =sort=: name of attributes to sort the output %RED%(this feature is currently disabled)%ENDCOLOR%
    * =reverse=: reverse the result set; possible values: on, off; default: off
@@ -118,7 +121,6 @@ The =format= string may contain the following variables:
 
 ---++ Plugin Settings
 <!-- provided for compatibility only
-   * Set SHORTDESCRIPTION = Query and display data from an LDAP directory
 -->
 
 The %TOPIC% will use the default configuration of the LdapContrib in your =LocalSite.cfg= file, that is
@@ -130,7 +132,7 @@ The %TOPIC% will use the default configuration of the LdapContrib in your =Local
    * $Foswiki::cfg{Ldap}{BindDN}
    * $Foswiki::cfg{Ldap}{BindPasswd}
 
----++ Plugin Installation Instructions
+---++ Installation Instructions
 %$INSTALL_INSTRUCTIONS%
 
 If you are using %TOPIC% together with LdapContrib to integrate LDAP users to Foswiki you might also want
@@ -154,18 +156,15 @@ to your =LocalSite.cfg= in case Foswiki:Extensions/AutoTemplatePlugin is install
 Please do _not_ use the =LdapWikiUsersView= template in case your are running Foswiki:Extensions/SolrPlugin as well which
 implements a fast solr-based person search with a different =SolrWikiUsersView= template.
 
-
 ---++ Dependencies
 %$DEPENDENCIES%
 
----++ Plugin Info
-
-|  Plugin Author: | Michael Daum |
-|  Copyright &copy;: | 2006-2015 Michael Daum http://michaeldaumconsulting.com |
-|  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
-|  Release: | %$RELEASE% |
-|  Version: | %$VERSION% |
-|  Change History: | &nbsp; |
+---++ Change History
+%TABLE{columnwidths="7em" tablewidth="100%"}%
+|  30 Aug 2017: | adjustments to recent changes in <nop>LdapContrib API |
+|  16 Jan 2017: | fix querying for users at all of the DNs configured in ={<nop>UserBase}= |
+|  02 Sep 2016: | added =nullformat= parameter to %LDAP macro |
+|  23 May 2016: | added =value_separator= to fetch multi-value attributes from LDAP |
 |  31 Aug 2015: | added support to index profile images stored in LDAP and indexed in Solr |
 |  16 Dec 2014: | added view template for [[%USERSWEB%.WikiUsers]]; \
                   more robust extraction of user information while indexing profiles with Foswiki:Extensions/SolrPlugin; \
@@ -197,5 +196,14 @@ implements a fast solr-based person search with a different =SolrWikiUsersView= 
 |  31 Aug 2006: | added NO_PREFS_IN_TOPIC |
 |  19 Jul 2006: | public release |
 |  25 April 2006: | Initial (internal) version |
-|  Plugin Home: | Foswiki:Extensions/%TOPIC% |
-|  Support: | Foswiki:Support/%TOPIC% |
+
+%META:FORM{name="PackageForm"}%
+%META:FIELD{name="Author" title="Author" value="Michael Daum"}%
+%META:FIELD{name="Copyright" title="Copyright" value="2006-2017 Michael Daum http://michaeldaumconsulting.com"}%
+%META:FIELD{name="Description" title="Description" value="%25$SHORTDESCRIPTION%25"}%
+%META:FIELD{name="Home" title="Home" value="Foswiki:Extensions/%TOPIC%"}%
+%META:FIELD{name="License" title="License" value="GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]])"}%
+%META:FIELD{name="Release" title="Release" value="%$RELEASE%"}%
+%META:FIELD{name="Repository" title="Repository" value="https://github.com/foswiki/%TOPIC%"}%
+%META:FIELD{name="Support" title="Support" value="Foswiki:Support/%TOPIC%"}%
+%META:FIELD{name="Version" title="Version" value="%$VERSION%"}%

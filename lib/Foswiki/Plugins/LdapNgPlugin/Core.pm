@@ -1,6 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2006-2015 Michael Daum http://michaeldaumconsulting.com
+# Copyright (C) 2006-2017 Michael Daum http://michaeldaumconsulting.com
 # Portions Copyright (C) 2006 Spanlink Communications
 #
 # This program is free software; you can redistribute it and/or
@@ -72,6 +72,7 @@ sub handleLdap {
 
   my $theCache = $params->{cache};
   $theCache = $Foswiki::cfg{Ldap}{DefaultCacheExpire} unless defined $theCache;
+  $theCache = 0 if $theCache eq 'off';
 
   if ($theCache && !$theRefresh) {
     my $data = $this->{cache}->get($fingerPrint);
@@ -98,6 +99,7 @@ sub handleLdap {
   my $theLimit = $params->{limit} || 0;
   my $theSkip = $params->{skip} || 0;
   my $theHideNull = Foswiki::Func::isTrue($params->{hidenull}, 0);
+  my $theNullFormat = $params->{nullformat} || '';
   my $theClear = $params->{clear} || '';
   my $theExclude = $params->{exclude} || '';
   my $theInclude = $params->{include} || '';
@@ -113,6 +115,8 @@ sub handleLdap {
   my $theSep = $params->{separator};
   $theSep = $params->{sep} unless defined $theSep;
   $theSep = '$n' unless defined $theSep;
+
+  my $theValueSep = $params->{value_separator} if defined $params->{value_separator};
 
 
   # fix args
@@ -177,10 +181,10 @@ sub handleLdap {
       if ($blobAttrs{$attr}) { 
         $data{$attr} = $ldap->cacheBlob($entry, $attr, $theRefresh);
       } else {
-	if (defined $params->{multivaluejoiner}) {
-	  $data{$attr} = $ldap->fromLdapCharSet( join($params->{multivaluejoiner}, $entry->get_value($attr)) );
-	} else {
-	  $data{$attr} = $ldap->fromLdapCharSet($entry->get_value($attr));
+        if (defined $theValueSep) {
+          $data{$attr} = $ldap->fromLdapCharSet(join($theValueSep, $ldap->getValues($entry, $attr)));
+        } else {
+          $data{$attr} = $ldap->fromLdapCharSet($entry->get_value($attr));
         }
       }
     }
@@ -190,7 +194,9 @@ sub handleLdap {
   $ldap->finish();
 
   my $count = scalar(@results);
-  return '' if $theHideNull && !$count;
+  unless ($count) {
+    return $theHideNull?"":$theNullFormat;
+  }
 
   my $result = expandVars($theHeader . join($theSep, @results) . $theFooter, count => $count);
 
@@ -412,16 +418,22 @@ sub indexTopicHandler {
   #print STDERR "filter='$filter'\n";
   my $entry;
   
-  my $search = $ldap->search(
-    filter => $filter,
-    limit => 1,
-    attrs => [ keys %$personAttributes ],
-    callback => sub {
-      my (undef, $result) = @_;
-      return unless defined $result;
-      $entry = $result;
-    },
-  );
+  foreach my $userBase (@{$ldap->{userBase}}) {
+    my $msg = $ldap->search(
+      filter => $filter,
+      limit => 1,
+      base => $userBase,
+      deref => "always",
+      attrs => [ keys %$personAttributes ],
+      callback => sub {
+        my (undef, $result) = @_;
+        return unless defined $result;
+        $entry = $result;
+      }
+    );
+
+    last if $entry;
+  }
 
   unless ($entry) {
     #print STDERR "$loginName not found in LDAP directory\n";
@@ -429,11 +441,6 @@ sub indexTopicHandler {
   }
 
   foreach my $attr ($entry->attributes()) {
-    my $value = $entry->get_value($attr);
-    next unless defined $value && $value ne '';
-
-    $value = $ldap->fromLdapCharSet($value);
-
     my $label = $personAttributes->{$attr};
 
     if ($label eq 'thumbnail') {
@@ -442,10 +449,10 @@ sub indexTopicHandler {
 
       $doc->add_fields($label => $value);
     } else {
-      my $value = $entry->get_value($attr);
-      next unless defined $value && $value ne '';
+      my @values = $ldap->getValues($entry, $attr);
+      next unless @values;
+      my $value = join(", ", @values); 
 
-      $value = $ldap->fromLdapCharSet($value);
 
       _set_field($doc, 'field_' . $label . '_s', $value);
       _set_field($doc, 'field_' . $label . '_search', $value);
