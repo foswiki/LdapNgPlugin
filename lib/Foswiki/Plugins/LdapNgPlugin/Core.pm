@@ -163,7 +163,7 @@ sub handleLdap {
   my $index = 0;
   my @results = ();
   foreach my $entry (@entries) {
-    my $dn = $entry->dn();
+    my $dn = $ldap->getDN($entry);
     if ($theCasesensitive) {
       next if $theExclude && $dn =~ /$theExclude/;
       next if $theInclude && $dn !~ /$theInclude/;

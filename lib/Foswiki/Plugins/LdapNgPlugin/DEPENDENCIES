@@ -1,2 +1,2 @@
-Foswiki::Contrib::LdapContrib,>=7.70,perl,Required
+Foswiki::Contrib::LdapContrib,>=7.80,perl,Required
 Cache::Cache,>=1.05,CPAN,Required

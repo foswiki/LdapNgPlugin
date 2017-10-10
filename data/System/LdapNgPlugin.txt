@@ -159,6 +159,7 @@ implements a fast solr-based person search with a different =SolrWikiUsersView= 
 
 ---++ Change History
 %TABLE{columnwidths="7em" tablewidth="100%"}%
+|  10 Oct 2017: | fixed decoding of =dn= | 
 |  30 Aug 2017: | adjustments to recent changes in <nop>LdapContrib API |
 |  16 Jan 2017: | fix querying for users at all of the DNs configured in ={<nop>UserBase}= |
 |  02 Sep 2016: | added =nullformat= parameter to %LDAP macro |
