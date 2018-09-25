@@ -116,8 +116,7 @@ sub handleLdap {
   $theSep = $params->{sep} unless defined $theSep;
   $theSep = '$n' unless defined $theSep;
 
-  my $theValueSep = $params->{value_separator};
-  $theValueSep = ", " unless defined $theValueSep;
+  my $theValueSep = $params->{value_separator} if defined $params->{value_separator};
 
 
   # fix args
@@ -182,7 +181,11 @@ sub handleLdap {
       if ($blobAttrs{$attr}) { 
         $data{$attr} = $ldap->cacheBlob($entry, $attr, $theRefresh);
       } else {
-        $data{$attr} = join($theValueSep, $ldap->getValues($entry, $attr));
+        if (defined $theValueSep) {
+          $data{$attr} = $ldap->fromLdapCharSet(join($theValueSep, $ldap->getValues($entry, $attr)));
+        } else {
+          $data{$attr} = $ldap->fromLdapCharSet($entry->get_value($attr));
+        }
       }
     }
     push @results, expandVars($theFormat, %data);
